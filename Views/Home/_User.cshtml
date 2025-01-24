@@ -1,0 +1,146 @@
+﻿@model UserViewModel;
+
+<div id="@(Model.client.Id)" class="UserView">
+    <h1 class="display-4">Welcome @(Model.client.UserName)</h1>
+</div>
+
+
+<div>
+    <label>Меню</label>
+    <table>
+        <tr>
+            <td>
+                <label>Название</label>
+            </td>
+            <td>
+                <label>Описание</label>
+            </td>
+            <td>
+                <label>Цена</label>
+            </td>
+        </tr>
+        @foreach (var item in Model.menu)
+        {
+            <tr class="@(item.IdDish)">
+                <td>
+                    <label class="Dish">@item.Dish</label>
+                </td>
+                <td>
+                    <label class="Description">@item.Description</label>
+                </td>
+                <td>
+                    <label class="Price">@item.Price</label>
+                </td>
+                <td>
+                    <button type="button" class="addDish">Добавить</button>
+                </td>
+            </tr>
+        }
+    </table>    
+</div>
+<div>
+    <label>Заказ</label>
+    <table id="MenuOrder">
+        <tr>
+            <td>
+                <label>Название</label>
+            </td>
+            <td>
+                <label>Цена</label>
+            </td>
+            <td>
+                <label>Количество</label>
+            </td>
+        </tr>
+    </table>
+    <label>Скидка</label>
+    <label>@(Model.client.Discount)</label><br />
+    <label>Сумма заказа: </label>
+    <label>Summ</label>
+    <button type="button" id="OrderSend">Заказать</button>
+</div>
+<div>
+    <button type="button" id="OrderHistoryBtn">История заказов</button>
+</div>
+<div id="OrderHistoryPlace"></div>
+<script>
+    $(document).ready(function () {
+        $(".addDish").on("click", function (e) {
+            let classDish = $(e.target).parent().parent().attr("class");
+            if ($("#MenuOrder").find("." + classDish).length) {
+                let a = $("#MenuOrder").find("." + classDish).find(".quantityDish");
+                a.text(Number(a.text()) + 1);
+            }
+            else {
+                let newTr = $(e.target).parent().parent().clone();
+                newTr.find(".Description").parent().remove();
+                newTr.find("button").parent().remove();
+                $('<td>' +
+                    '<label class="quantityDish">1</label>' +
+                  '</td>' +
+                  '<td>' +
+                    '<button type="button" class="deleteDish">Удалить</button>' +
+                  '</td>').appendTo(newTr);
+                newTr.appendTo("#MenuOrder");
+            }
+        });
+       
+        $("#MenuOrder").on("click", ".deleteDish", function (e) {
+            if ($(e.target).parent().parent().find(".quantityDish").text() == 1) {
+                $(e.target).parent().parent().remove();
+            }
+            else {
+                let a = $(e.target).parent().parent().find(".quantityDish");
+                a.text(Number(a.text()) - 1);
+            }
+        });
+
+        $("#OrderSend").on("click", function (e) {
+            const orderSend = [];
+            $("#MenuOrder").find("tr").each(function () {
+                orderSend.push({
+                    IdOrder: 0,
+                    IdDish: $(this).attr("class"),
+                    Quantity: $(this).find(".quantityDish").text(),
+                });
+            });
+            orderSend.splice(0, 1);   //? проверка
+            console.log(orderSend);            
+            $.ajax({
+                type: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + sessionStorage.getItem(tokenKey),
+                },
+                url: "Home/GetOrder",
+                data: {
+                    userOrder: orderSend,
+                    idUser: $(".UserView").attr("id")
+                },
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (data) {
+                    console.log(data);                    
+                }
+            });
+        });
+        $("#OrderHistoryBtn").on("click", function (e) {
+            $.ajax({
+                type: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + sessionStorage.getItem(tokenKey),
+                },
+                url: "Home/GetOrderHistory",
+                data: { idUser: $(".UserView").attr("id") },
+                success: function (data) {
+                    $("#OrderHistoryPlace").html(data)
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,11 @@
+{
+  "Id": "f115cc8d-cade-44ff-8ca3-e2758efd7af6",
+  "UserName": "Oper",
+  "Password": "123",
+  "FIO": "F I O",
+  "Adress": "adres",
+  "Phone": "898880",
+  "Discount": "awsderf",
+  "MyOrders": null,
+  "Role": "Operator"
+}

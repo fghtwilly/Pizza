@@ -1,0 +1,215 @@
+﻿<div class="form-group"> 
+    <h2>Вход на сайт</h2>
+    <div id="registrationplace">
+        <button type="button" id="registration">Зарегистрироваться</button><br />
+    </div>
+    
+    <div class="loginform" >
+        <h2>Регистрация</h2>
+        <table>
+            <tr>
+                <td>Имя пользователя</td>
+                <td>
+                    <input id="usernameR" type="text" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Пароль</td>
+                <td>
+                    <input id="passwordR" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Подтверждение пароля</td>
+                <td>
+                    <input id="passwordR2" value="" />
+                </td>
+            </tr>            
+            <tr>
+                <td>Фамилия</td>
+                <td>
+                    <input id="LastName" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Имя</td>
+                <td>
+                    <input id="Name" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Отчество</td>
+                <td>
+                    <input id="MiddleName" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Адресс</td>
+                <td>
+                    <input id="Adress" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Номер телефона</td>
+                <td>
+                    <input id="Phone" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Скидка</td>
+                <td>
+                    <input id="Discount" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>Роль</td>
+                <td>
+                <select id="Role">
+                    <option value="User">Пользователь</option>
+                    <option value="Operator">Оператор</option>
+                </select>
+                </td>
+            </tr>
+        </table>
+        <label id="messageRegistration"></label>
+        <br />
+
+        <button type="button" id="registrationForm">Зарегистрироваться</button>
+    </div>
+      
+    <div >
+        <p>
+            <label>Введите логин</label><br />
+            <input id="login" />
+        </p>
+        <p>
+            <label>Введите пароль</label><br />
+            <input type="password" id="password" />
+        </p>
+        <button type="button" id="btn_login">Войти</button><br />
+        <label id="messageLogin"></label>
+    </div>
+    
+    
+</div>
+<script>  
+    var tokenKey = "accessToken";    
+    $(document).ready(function () {
+
+        $("#registration").on("click", function (e) {                           //выплывающее окно с регистрационными полями
+            b = document.querySelector('.loginform');
+            if (b.style.display == 'block')
+                b.style.display = 'none'
+            else {
+                b.style.display = 'block';
+            }
+        });
+
+        $("#registrationForm").on("click", function (e) {                                               //регистрация пользователя
+            console.log($("#passwordR").val());
+            console.log($("#passwordR2").val());
+            if (!($("#passwordR").val()) || ($("#passwordR").val() != $("#passwordR2").val())) {
+                $("#messageRegistration").text("Пароль не подтвержден");
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "Authentication/RegistrationSave",
+                    data: {
+                        UserName: $("#usernameR").val(),
+                        Password: $("#passwordR").val(),
+                        Name: $("#Name").val(),
+                        MiddleName: $("#MiddleName").val(),
+                        LastName: $("#LastName").val(),
+                        Adress: $("#Adress").val(),
+                        Phone: $("#Phone").val(),
+                        Discount: $("#Discount").val(),
+                        Role: $("#Role").val()
+                    },
+                    success: function (data) {
+                        sessionStorage.setItem(tokenKey, data.access_token);
+                        if (data.role === "User") {
+                            LoginUser(data.username);
+                        }
+                        if (data.role === "Operator") {
+                            LoginOperator(data.username);
+                        }
+                    },
+                    error: function (data) {
+                        $("#messageRegistration").text(data.responseText);
+                    }
+                });
+            }
+        });
+
+
+        $("#btn_login").on("click", function (e) {      //вход пользоватля по паролю и логину                 
+            $.ajax({
+                type: "POST",
+                url: "Authentication/TakeLogin",
+                data: {
+                    username: $("#login").val(),
+                    password: $("#password").val()
+                },
+                success: function (data) {
+                    sessionStorage.setItem(tokenKey, data.access_token);
+                    if (data.role === "User") {
+                        LoginUser(data.username);
+                    }
+                    if (data.role === "Operator") {
+                        LoginOperator(data.username);
+                    }
+                },
+                error: function (data) {
+                    $("#messageLogin").text(data.responseText);
+                }
+            });
+        });
+
+        function LoginUser(username) {
+            $.ajax({
+                type: "POST",
+                url: "Home/Login_User",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + sessionStorage.getItem(tokenKey),
+                },
+                data: { username: username },
+                success: function (data) {
+                    $(".form-group").html(data);
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        }
+
+        function LoginOperator(username) {
+            $.ajax({
+                type: "POST",
+                url: "Home/Login_Operator",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + sessionStorage.getItem(tokenKey),
+                },
+                data: { username: username },
+                success: function (data) {
+                    $(".form-group").html(data);
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .loginform {
+        display: none;
+    }
+
+    .info {
+        display: none;
+    }
+</style>

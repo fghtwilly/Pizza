@@ -1,0 +1,100 @@
+﻿@model OrderHistoryViewModel;
+@{
+    Menu dishFromId;
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome Operator</h1>
+</div>
+
+<div>
+    <label>Меню</label>
+    <table>
+        <tr>
+            <td>
+                <label>Название</label>
+            </td>
+            <td>
+                <label>Описание</label>
+            </td>
+            <td>
+                <label>Цена</label>
+            </td>
+        </tr>
+        @foreach (var item in Model.menu)
+        {
+            <tr>
+                <td>
+                    <label>@item.Dish</label>
+                </td>
+                <td>
+                    <label>@item.Description</label>
+                </td>
+                <td>
+                    <label>@item.Price</label>
+                </td>
+            </tr>
+        }
+    </table>
+    <button type="button" id="menuChange">Изменить</button>
+</div>
+
+<div id="ChangePlace"></div>
+
+<div id="OrderHistoryPlace">
+    <table>
+        @foreach (var item in Model.orderDictionary)
+        {
+            <tr>
+                <td>
+                    <label>Скидка:</label>
+                </td>
+                <td>
+                    <label>@(item.Key.Discount)</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Время заказа:</label>
+                </td>
+                <td>
+                    <label>@(item.Key.TimeOrder)</label>
+                </td>
+            </tr>
+            @foreach (var dish in item.Value)
+            {
+                dishFromId = Model.menu.FirstOrDefault(s => s.IdDish == dish.IdDish);
+                <tr>
+                    <td>
+                        <label>@(dishFromId.Dish)</label>
+                    </td>
+                    <td>
+                        <label>@(dish.Quantity)</label>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#menuChange").on("click", function (e) {
+            $.ajax({
+                type: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + sessionStorage.getItem(tokenKey),
+                },
+                url: "Home/GetMenu",
+                data: {},
+                success: function (data) {
+                    $("#ChangePlace").html(data);
+                },
+                error: function (data) {
+                    $("#messageLogin").text(data.responseText);
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,79 @@
+﻿@model List<Menu>;
+
+<table id="TableMenuChange">    
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                <input class="Dish" id="@(item.IdDish)" value="@item.Dish">
+            </td>            
+            <td>
+                <input class="Description" id="@(item.Description)Description" value="@item.Description">
+            </td>
+            <td>
+                <input type="number" class="Price" id="@(item.Price)Price" value="@item.Price">
+            </td>
+            <td>
+                <button type="button" class="deletePosition">Удалить</button>
+            </td>            
+        </tr>
+    }
+</table>
+<button type="button" id="AddPosition">Добавить</button>
+<button type="button" id="SaveChange">Сохранит изменения</button>
+
+<script>
+    BtnDelete();
+    $("#AddPosition").on( "click", function (e) {
+        $('<tr>' +
+            '<td>' +
+                '<input class="Dish"  value = "">' +
+            '</td>' +
+            '<td>' +
+                '<input class="Description" value = "">' +
+            '</td>' +
+            '<td>' +
+                '<input type="number" class="Price" value = "">' +
+            '</td>' +
+            '<td>' +
+                '<button type="button" class="deletePosition"> Удалить </button>' +
+            '</td>' +
+        '</tr>').appendTo("#TableMenuChange");
+        BtnDelete();
+    });
+    function BtnDelete() {
+        $(".deletePosition").on("click", function (e) 
+        {           
+            $(e.target).parent().parent().remove();            
+        });
+    }
+    $("#SaveChange").on("click", function (e) {
+        const newMenu = [];
+        $("#TableMenuChange").find("tr").each( function () {
+            newMenu.push({
+                IdDish: $(this).find(".Dish").attr('id'),
+                Dish: $(this).find(".Dish").val(),
+                Description: $(this).find(".Description").val(),
+                Price: $(this).find(".Price").val()
+            });
+        });
+        console.log(newMenu);
+        const serializedNewMenu = JSON.stringify(newMenu);          //? заменить json на модель лист<>
+        console.log(serializedNewMenu);
+        $.ajax({
+            type: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Authorization": "Bearer " + sessionStorage.getItem(tokenKey),
+            },
+            url: "Home/SaveChangeMenu",            
+            data: { jsonMenu: serializedNewMenu },
+            success: function (data) {
+                console.log(data);
+            },
+            error: function (data) {
+                $("#messageLogin").text(data.responseText);
+            }
+        });
+    });
+</script>
