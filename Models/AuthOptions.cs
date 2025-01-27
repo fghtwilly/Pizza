@@ -7,7 +7,7 @@ namespace Pizza.Models
     {
         public const string ISSUER = "MyAuthServer";
         public const string AUDIENCE = "MyAuthClient";
-        const string KEY = "mysupersecret_secretsecretsecretkey!123";
+        const string KEY = "";
         public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(KEY));
     }

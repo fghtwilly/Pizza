@@ -22,7 +22,7 @@ namespace Pizza.Models.DBContext
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=PizzaBase;Username=postgres;Password=89887683814");
+            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=PizzaBase;Username=postgres;Password=");
         }
     }
 }
